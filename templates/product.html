@@ -1,0 +1,84 @@
+<!-- templates/product.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="product-detail-container">
+    <nav class="breadcrumb">
+        <a href="/">Home</a> > {{ product.category }} > {{ product.name }}
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-image-section">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="main-image">
+        </div>
+
+        <div class="product-info-section">
+            <h1>{{ product.name }}</h1>
+            <div class="product-meta">
+                <p class="price">${{ product.price }}</p>
+                <div class="rating">
+                    {% for _ in range(product.rating|int) %}
+                        <i class="fas fa-star"></i>
+                    {% endfor %}
+                    {% if product.rating % 1 >= 0.5 %}
+                        <i class="fas fa-star-half-alt"></i>
+                    {% endif %}
+                    <span class="rating-value">({{ product.rating }})</span>
+                </div>
+            </div>
+
+            <div class="product-description">
+                <h2>Description</h2>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <div class="product-details">
+                <div class="stock-info">
+                    {% if product.stock > 0 %}
+                        <span class="in-stock">
+                            <i class="fas fa-check"></i> In Stock ({{ product.stock }} available)
+                        </span>
+                    {% else %}
+                        <span class="out-of-stock">
+                            <i class="fas fa-times"></i> Out of Stock
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="product-brand">
+                    <strong>Brand:</strong> {{ product.brand }}
+                </div>
+                <div class="product-category">
+                    <strong>Category:</strong> {{ product.category }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="reviews-section">
+        <h2>Customer Reviews</h2>
+        {% if product.reviews %}
+            <div class="reviews-grid">
+                {% for review in product.reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-rating">
+                            {% for _ in range(review.rating|int) %}
+                                <i class="fas fa-star"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="review-date">{{ review.date }}</span>
+                    </div>
+                    <div class="review-content">
+                        <p class="review-text">{{ review.comment }}</p>
+                        <p class="reviewer-name">- {{ review.customer_name }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-reviews">
+                <p>No reviews yet for this product.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

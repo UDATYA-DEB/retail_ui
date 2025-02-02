@@ -1,0 +1,253 @@
+/* static/style.css */
+:root {
+    --primary-black: #1a1a1a;
+    --primary-cream: #faf9f6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--primary-cream);
+    color: var(--primary-black);
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 2px 0 5px var(--shadow-color);
+}
+
+.filters h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.filters label {
+    display: block;
+    margin: 5px 0;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.search-bar {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--primary-black);
+    border-radius: 4px;
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    background-color: var(--primary-black);
+    color: var(--primary-cream);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Product Grid Styles */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.product-card {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Chatbot Styles */
+.chatbot-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-black);
+    color: var(--primary-cream);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.chat-window {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    width: 300px;
+    height: 400px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 10px;
+    background-color: var(--primary-black);
+    color: var(--primary-cream);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.chat-input {
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--primary-black);
+    border-radius: 4px;
+}
+
+/* Product Detail Page Styles */
+.product-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.product-image img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.reviews {
+    margin-top: 40px;
+}
+
+.review {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+/* static/script.js */
+function applyFilters() {
+    const filters = {
+        search: document.getElementById('searchInput').value,
+        category: Array.from(document.querySelectorAll('input[name="category"]:checked')).map(cb => cb.value),
+        brand: Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(cb => cb.value),
+        price_range: [0, document.getElementById('priceRange').value]
+    };
+
+    fetch('/filter', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(filters)
+    })
+    .then(response => response.json())
+    .then(products => updateProductGrid(products));
+}
+
+function updateProductGrid(products) {
+    const grid = document.querySelector('.products-grid');
+    grid.innerHTML = '';
+    
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => window.location.href = `/product/${product.id}`;
+        
+        card.innerHTML = `
+            <img src="${product.image_url}" alt="${product.name}">
+            <h3>${product.name}</h3>
+            <p class="price">$${product.price}</p>
+            <div class="rating">
+                ${'<i class="fas fa-star"></i>'.repeat(product.rating)}
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
+}
+
+function toggleChat() {
+    const chatWindow = document.querySelector('.chat-window');
+    chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+}
+
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value;
+    if (!message) return;
+
+    const chatMessages = document.querySelector('.chat-messages');
+    chatMessages.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+    input.value = '';
+
+    fetch('/chatbot', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        chatMessages.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+}
+
+// Initialize price range display
+document.getElementById('priceRange').addEventListener('input', function() {
+    document.getElementById('priceValue').textContent = '$' + this.value;
+});

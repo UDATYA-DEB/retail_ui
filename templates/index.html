@@ -1,0 +1,110 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="customer-id">
+            <input type="text" placeholder="Enter Customer ID" id="customerId">
+        </div>
+        <div class="filters">
+            <h3>Categories</h3>
+            <div class="category-list">
+                {% for category in categories %}
+                <label>
+                    <input type="checkbox" name="category" value="{{ category }}"
+                        {% if category in selected_categories %}checked{% endif %}>
+                    {{ category }}
+                </label>
+                {% endfor %}
+            </div>
+        
+            <h3>Price Range</h3>
+            <div class="price-range">
+                <input type="range" min="0" max="1000" value="{{ price_range }}" id="priceRange">
+                <span id="priceValue">${{ price_range }}</span>
+            </div>
+        
+            <h3>Brands</h3>
+            <div class="brand-list">
+                {% for brand in brands %}
+                <label>
+                    <input type="checkbox" name="brand" value="{{ brand }}"
+                        {% if brand in selected_brands %}checked{% endif %}>
+                    {{ brand }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>    
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="search-bar">
+            <input type="text" placeholder="Search products..." id="searchInput" value="{{ search_query }}">
+            <button onclick="FilterManager.applyFilters()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>   
+
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card" onclick="showProductModal('{{ product.id }}')">
+                <div class="product-image">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <p class="price">${{ product.price }}</p>
+                    <div class="rating">
+                        {% for _ in range(product.rating|int) %}
+                            <i class="fas fa-star"></i>
+                        {% endfor %}
+                        {% if product.rating % 1 >= 0.5 %}
+                            <i class="fas fa-star-half-alt"></i>
+                        {% endif %}
+                    </div>
+                    <p class="stock">Customers bought: {{ product.rating_number }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Add this to your index.html inside the container div, after the main content -->
+    <div class="modal-overlay" id="productModal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProductModal()">×</button>
+            
+            <div class="product-detail">
+                <div class="product-image-section">
+                    <img src="" alt="" class="main-image" id="modalProductImage">
+                </div>
+
+                <div class="product-info-section">
+                    <h1 id="modalProductName"></h1>
+                    <div class="product-meta">
+                        <p class="price" id="modalProductPrice"></p>
+                        <div class="rating" id="modalProductRating"></div>
+                    </div>
+
+                    <div class="product-description">
+                        <h2>Description</h2>
+                        <p id="modalProductDescription"></p>
+                    </div>
+
+                    <div class="product-details">
+                        <div class="stock-info" id="modalProductStock"></div>
+                        <div class="product-brand" id="modalProductBrand"></div>
+                        <div class="product-category" id="modalProductCategory"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reviews-section">
+                <h2>Customer Reviews</h2>
+                <div class="reviews-grid" id="modalProductReviews"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
